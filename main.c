@@ -19,25 +19,124 @@ void clear_matrix(char addr);
 char shift_it(char byte);
 
 const char zero_bitmap[] = {
-	0b00111100,
-	0b00100100,
-	0b00100100,
-	0b00100100,
-	0b00100100,
-	0b00100100,
-	0b00100100,
-	0b00111100	
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00111000,
+	0b00101000,
+	0b00101000,
+	0b00101000,
+	0b00111000	
 };
 
 const char one_bitmap[] = {
-	0b00000100,
-	0b00000100,
-	0b00000100,
-	0b00000100,
-	0b00000100,
-	0b00000100,
-	0b00000100,
-	0b00000100
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00001000,
+	0b00001000,
+	0b00001000,
+	0b00001000,
+	0b00001000
+};
+
+const char two_bitmap[] = {
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00111000,
+	0b00001000,
+	0b00111000,
+	0b00100000,
+	0b00111000
+};
+
+const char three_bitmap[] = {
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00111000,
+	0b00001000,
+	0b00111000,
+	0b00001000,
+	0b00111000
+};
+
+const char four_bitmap[] = {
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00101000,
+	0b00101000,
+	0b00111000,
+	0b00001000,
+	0b00001000
+};
+
+const char five_bitmap[] = {
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00111000,
+	0b00100000,
+	0b00111000,
+	0b00001000,
+	0b00111000
+};
+
+const char six_bitmap[] = {
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00100000,
+	0b00100000,
+	0b00111000,
+	0b00101000,
+	0b00111000
+};
+
+const char seven_bitmap[] = {
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00111000,
+	0b00001000,
+	0b00001000,
+	0b00001000,
+	0b00001000
+};
+
+const char eight_bitmap[] = {
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00111000,
+	0b00101000,
+	0b00111000,
+	0b00101000,
+	0b00111000
+};
+
+const char nine_bitmap[] = {
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00111000,
+	0b00101000,
+	0b00111000,
+	0b00001000,
+	0b00001000
+};
+
+const char neg_bitmap[] = {
+	0b00000000,
+	0b00011100,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000
 };
 
 int main(void)
@@ -61,7 +160,7 @@ int main(void)
 	PORTA |= 0x10;					//PA4 SCL
 	PORTA |= 0x40;					//PA6 SDA
 	USIDR |= 0xFF;
-	_delay_ms(10);
+	_delay_us(10);
 	/**********************/
 	
 	int m = 0;
@@ -79,31 +178,31 @@ int main(void)
 		i2c_send_data(0x21);			// internal clock enable
 		i2c_stop();
 	
-		_delay_ms(10);
+		_delay_us(10);
 	
 		i2c_start();
 		i2c_send_addr(currMatrix);
 		i2c_send_data(0xA0);			// row/int set
 		i2c_stop();
 	
-		_delay_ms(10);
+		_delay_us(10);
 	
 		i2c_start();
 		i2c_send_addr(currMatrix);
-		i2c_send_data(0xEF);			// dimming set
+		i2c_send_data(0xE1);			// dimming set
 		i2c_stop();
 	
-		_delay_ms(10);
+		_delay_us(10);
 	
 		i2c_start();
 		i2c_send_addr(currMatrix);
 		i2c_send_data(0x81);			// blinking set
 		i2c_stop();
 	
-		_delay_ms(10);
+		_delay_us(10);
 		
 		clear_matrix(currMatrix);
-		_delay_ms(10);
+		_delay_us(10);
 
 		i2c_start();
 		i2c_send_addr(currMatrix);
@@ -111,7 +210,7 @@ int main(void)
 		
 		int c = 0;
 		for (c = 0; c < 8; c++) {
-			i2c_send_data(shift_it(((one_bitmap[c] << 2) | (zero_bitmap[c] >> 2))));	// write out bitmaps to LED and shift them to opposite sides so both digits appear on screen
+			i2c_send_data(shift_it(((neg_bitmap[c]) | (zero_bitmap[c] << 1) | (seven_bitmap[c] >> 3))));	// write out bitmaps to LED and shift them to opposite sides so both digits appear on screen
 			i2c_send_data(0x00);														// skip one address in display RAM since only every-other address is tied to an LED row on the matrix
 		}
 		
@@ -170,6 +269,6 @@ void clear_matrix(char addr) {
 }
 
 //ISR(PCINT0_vect) {
-//	//_delay_ms(10);
+//	//_delay_us(10);
 //	motion_detect_flag = 1;
 //}
